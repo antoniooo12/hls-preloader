@@ -3,19 +3,22 @@ import {MOCK_VIDEOS} from "./MOCK_VIDEOS.ts";
 import Hls from "hls.js";
 
 // preload videos
-function preloadNextVideo(src) {
+function preloadNextVideo(src): Promise<Hls> {
     // configured to load only 5 seconds of video / 1 chunk
-    const nextVideoHls = new Hls({debug: true, maxBufferLength: 5, maxBufferSize: 800});
-    nextVideoHls.loadSource(src);
-    const video = document.createElement('video')
-    video.pause()
-    nextVideoHls.attachMedia(video); // Create a new video element but don't add to DOM
-    nextVideoHls.on(Hls.Events.MANIFEST_PARSED, function () {
-        console.log('next video is ready to be played');
-    });
+   return new Promise((resolve, reject) => {
+       const nextVideoHls = new Hls({debug: true, maxBufferLength: 5, maxBufferSize: 800});
+       nextVideoHls.loadSource(src);
+       const video = document.createElement('video')
+       video.pause()
+       nextVideoHls.attachMedia(video); // Create a new video element but don't add to DOM
+       nextVideoHls.on(Hls.Events.MANIFEST_PARSED, function () {
+              resolve(nextVideoHls);
+       });
+   })
     // maybe it's better to detach media when video here
-    return nextVideoHls;
+
 }
+
 
 const links = MOCK_VIDEOS.map(m => `https://stream.mux.com/${m.mux}.m3u8`);
 export const AppV4 = () => {
@@ -26,14 +29,14 @@ export const AppV4 = () => {
     useEffect(() => {
      const timeout =   setTimeout(()=>{
             // preload all videos
-            const load = () => {
-                links.map((link, index) => {
-                    const hls = preloadNextVideo(link);
+            const load = async () => {
+                for (const link of links) {
+                    const hls = await preloadNextVideo(link);
                     setInstances(prevState => [...prevState, hls]);
-                })
+                }
             }
             load();
-        },1500)
+        },2000)
         return () => {
             clearTimeout(timeout);
         }
