@@ -24,14 +24,19 @@ export const AppV4 = () => {
 
     const [instances, setInstances] = useState<Hls[]>([]);
     useEffect(() => {
-        // preload all videos
-        const load = () => {
-            links.map((link, index) => {
-                const hls = preloadNextVideo(link);
-                setInstances(prevState => [...prevState, hls]);
-            })
+     const timeout =   setTimeout(()=>{
+            // preload all videos
+            const load = () => {
+                links.map((link, index) => {
+                    const hls = preloadNextVideo(link);
+                    setInstances(prevState => [...prevState, hls]);
+                })
+            }
+            load();
+        },1500)
+        return () => {
+            clearTimeout(timeout);
         }
-        load();
     }, []);
 
 
@@ -66,11 +71,17 @@ export const AppV4 = () => {
             <video
                 onEnded={onEnded}
                 ref={videoRef} controls autoPlay style={{width: 300, height: 300}}/>
-            {links.map((link, index) => (
-                <button key={index} onClick={() => setCurrentVideo(index)}>
-                    Video {index + 1}
-                </button>
-            ))}
+            <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 10
+            }}>
+                {links.map((link, index) => (
+                    <button className="animated-button" key={index} onClick={() => setCurrentVideo(index)}>
+                        Video {index + 1}
+                    </button>
+                ))}
+            </div>
         </div>
     );
 
