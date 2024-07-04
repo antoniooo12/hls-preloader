@@ -15,23 +15,30 @@ function preloadNextVideo(src) {
 const links = MOCK_VIDEOS.map(m => `https://stream.mux.com/${m.mux}.m3u8`);
 export const AppV4 = () => {
 
-    const videoRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const [instances, setInstances] = useState<Hls[]>([]);
     useEffect(() => {
-     const load =  () => {
-         links.map((link, index) => {
-          const hls = preloadNextVideo(link);
-            setInstances(prevState => [...prevState, hls]);
-         })
-     }
-     load();
+        const load = () => {
+            links.map((link, index) => {
+                const hls = preloadNextVideo(link);
+                setInstances(prevState => [...prevState, hls]);
+            })
+        }
+        load();
     }, []);
 
 
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+
     const setCurrentVideo = (index: number) => {
+
+        const prevHls = instances[currentVideoIndex];
+        prevHls.detachMedia();
+        setCurrentVideoIndex(index);
         const selectedHls = instances[index];
-        selectedHls.detachMedia();
+        selectedHls.detachMedia()
         selectedHls.attachMedia(videoRef.current!);
+        videoRef.current.play();
         // const selectedHls = instances[index];
         // selectedHls.attachMedia(videoRef.current!);
     }
