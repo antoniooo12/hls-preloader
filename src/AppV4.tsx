@@ -3,9 +3,11 @@ import {MOCK_VIDEOS} from "./MOCK_VIDEOS.ts";
 import Hls from "hls.js";
 
 function preloadNextVideo(src) {
-    const nextVideoHls = new Hls({debug: true});
+    const nextVideoHls = new Hls({debug: true, maxBufferLength: 5, maxBufferSize: 800});
     nextVideoHls.loadSource(src);
-    nextVideoHls.attachMedia(document.createElement('video')); // Create a new video element but don't add to DOM
+    const video = document.createElement('video')
+    video.pause()
+    nextVideoHls.attachMedia(video); // Create a new video element but don't add to DOM
     nextVideoHls.on(Hls.Events.MANIFEST_PARSED, function () {
         console.log('next video is ready to be played');
     });
