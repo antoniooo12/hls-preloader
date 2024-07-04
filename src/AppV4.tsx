@@ -40,9 +40,9 @@ export const AppV4 = () => {
         const selectedHls = instances[index];
         selectedHls.detachMedia()
         selectedHls.attachMedia(videoRef.current!);
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0.01;
         videoRef.current.play();
-        // const selectedHls = instances[index];
-        // selectedHls.attachMedia(videoRef.current!);
     }
 
     return (
