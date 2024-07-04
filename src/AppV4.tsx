@@ -6,14 +6,17 @@ import Hls from "hls.js";
 function preloadNextVideo(src): Promise<Hls> {
     // configured to load only 5 seconds of video / 1 chunk
    return new Promise((resolve, reject) => {
-       const nextVideoHls = new Hls({debug: true, maxBufferLength: 5, maxBufferSize: 800});
+       const nextVideoHls = new Hls({debug: true, maxBufferLength: 5, maxBufferSize: 1200});
        nextVideoHls.loadSource(src);
        const video = document.createElement('video')
        video.pause()
        nextVideoHls.attachMedia(video); // Create a new video element but don't add to DOM
        nextVideoHls.on(Hls.Events.MANIFEST_PARSED, function () {
-              resolve(nextVideoHls);
+              // resolve(nextVideoHls);
        });
+       nextVideoHls.on(Hls.Events.FRAG_LOADED, function (event, data) {
+           resolve(nextVideoHls);
+       })
    })
     // maybe it's better to detach media when video here
 
@@ -32,6 +35,7 @@ export const AppV4 = () => {
             const load = async () => {
                 for (const link of links) {
                     const hls = await preloadNextVideo(link);
+
                     setInstances(prevState => [...prevState, hls]);
                 }
             }
