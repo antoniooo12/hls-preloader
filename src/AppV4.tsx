@@ -44,10 +44,18 @@ export const AppV4 = () => {
         videoRef.current.currentTime = 0.01;
         videoRef.current.play();
     }
+    const onEnded = () => {
+        const nextIndex = currentVideoIndex + 1;
+        if (nextIndex < links.length) {
+            setCurrentVideo(nextIndex);
+        }
+    }
 
     return (
         <div>
-            <video ref={videoRef} controls autoPlay style={{width: 300, height: 300}}/>
+            <video
+                onEnded={onEnded}
+                ref={videoRef} controls autoPlay style={{width: 300, height: 300}}/>
             {links.map((link, index) => (
                 <button key={index} onClick={() => setCurrentVideo(index)}>
                     Video {index + 1}
