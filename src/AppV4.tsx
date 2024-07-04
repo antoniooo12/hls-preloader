@@ -1,0 +1,50 @@
+import {useEffect, useRef, useState} from "react";
+import {MOCK_VIDEOS} from "./MOCK_VIDEOS.ts";
+import Hls from "hls.js";
+
+function preloadNextVideo(src) {
+    const nextVideoHls = new Hls({debug: true});
+    nextVideoHls.loadSource(src);
+    nextVideoHls.attachMedia(document.createElement('video')); // Create a new video element but don't add to DOM
+    nextVideoHls.on(Hls.Events.MANIFEST_PARSED, function () {
+        console.log('next video is ready to be played');
+    });
+    return nextVideoHls;
+}
+
+const links = MOCK_VIDEOS.map(m => `https://stream.mux.com/${m.mux}.m3u8`);
+export const AppV4 = () => {
+
+    const videoRef = useRef(null);
+    const [instances, setInstances] = useState<Hls[]>([]);
+    useEffect(() => {
+     const load =  () => {
+         links.map((link, index) => {
+          const hls = preloadNextVideo(link);
+            setInstances(prevState => [...prevState, hls]);
+         })
+     }
+     load();
+    }, []);
+
+
+    const setCurrentVideo = (index: number) => {
+        const selectedHls = instances[index];
+        selectedHls.detachMedia();
+        selectedHls.attachMedia(videoRef.current!);
+        // const selectedHls = instances[index];
+        // selectedHls.attachMedia(videoRef.current!);
+    }
+
+    return (
+        <div>
+            <video ref={videoRef} controls autoPlay style={{width: 300, height: 300}}/>
+            {links.map((link, index) => (
+                <button key={index} onClick={() => setCurrentVideo(index)}>
+                    Video {index + 1}
+                </button>
+            ))}
+        </div>
+    );
+
+};
